@@ -1,3 +1,3 @@
 # TeamD
 ============
-Hi this is a test readme, for introduce myself in the glorious world of github.
+Non ho idea di dove cazzo devo mettere il source code.
