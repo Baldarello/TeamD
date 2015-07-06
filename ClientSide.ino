@@ -8,8 +8,8 @@ by Team Destroyer
 
 */
 
-#include
-#include
+#include <SPI.h>
+#include <Ethernet.h>
 
 byte mac[] = { 0x98, 0x4F, 0xEE, 0x00, 0x5F, 0xB6 }; //Mac della scheda da usare come client
 IPAddress server(192,168,100,100); // Server aka altra scheda con mac[] = { 0x98, 0x4F, 0xEE, 0x00, 0x5F, 0xCC };
