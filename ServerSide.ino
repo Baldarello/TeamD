@@ -1,7 +1,7 @@
 /*
   Web server
  
- Sketch per usare una scheda galileo come server
+ Sketch to use Intel Galileo board as a Server.
    
  created 15 May 2015
  by Team Destroyer
@@ -12,16 +12,16 @@
 #include <Ethernet.h>
 
 
-byte mac[] = {   0x98, 0x4F, 0xEE, 0x00, 0x5F, 0xCC }; //indirizzo Mac della scheda che lavora da server
-IPAddress ip(192,168,1,1); //Ip del server
-byte leggi=0; //byte per leggere da Serail
-const int button = 11;  // pushbutton 1 pin
+byte mac[] = {   0x98, 0x4F, 0xEE, 0x00, 0x5F, 0xCC }; //MAC address of the board
+IPAddress ip(192,168,1,1); //Server IP address
+byte reading=0; //byte to read from Serial
+const int button = 11;  // pushbutton 11-pin
 int buttonState = 0;
-int conta=0;
+int count=0;
 
 
 
-EthernetServer server(60001);//porta 60001
+EthernetServer server(60001);//port 60001
 
 void setup() {
    pinMode(button, INPUT); 
@@ -29,23 +29,23 @@ void setup() {
   Serial.begin(9600);
   
 
-  // Avvio della connessione Ethernet e del server:
+  // Start the Server and Ethernet connections:
   Ethernet.begin(mac, ip);
   delay(2000);
   server.begin();
-  Serial.print("Indirizzo IP Server: ");
+  Serial.print("Server IP address: ");
   Serial.println(Ethernet.localIP());
 }
 
 
 void loop() {
-  //verifico la presenza di un client connesso
+  //check of the connected Client
   EthernetClient client = server.available();
   if (client) {
     
-    Serial.println("Nuovo client connesso!");
+    Serial.println("New Client connected!");
       boolean currentLineIsBlank = true;
-    // Aspetto informazioni dal client
+    // wait for Client informations
    
     while (client.connected()) {
       if (client.available()) {
@@ -53,64 +53,64 @@ void loop() {
     
      Serial.write(c);
       if (c == '\n' && currentLineIsBlank) {
-          //Qui posso inviare una risposta al client
+          //here you can send answer to Client
       break;
         }
         if (c == '\n') {
-          // Nuova linea
+          // new line
           currentLineIsBlank = true;
         } 
         else if (c != '\r') {
-          //Ho ricevuto un carattere
+          //character received
           currentLineIsBlank = false;
         }
       }
    }
    
    
-   while(1){ //Parte per inviare al client ciò che digito
+   while(1){ //section to send to Client what you type
    
-     buttonState= digitalRead(button);//Lettura stato bottone
+     buttonState= digitalRead(button);//reading button state
     
 
-  while(buttonState == LOW && conta>=0 && conta <=200){//Ciclo per identificare la pressione di un '.' o di una '_'
-    conta++;
+  while(buttonState == LOW && count>=0 && count <=200){//Cycle to identify the press of a '.' or a '_'
+    count++;
     buttonState= digitalRead(button);
   }
   
  
   
-  if(conta > 2 && conta <=120){
+  if(count > 2 && count <=120){
     Serial.print(".");
-    client.write("."); //Invito al client '.'
+    client.write("."); //Send '.' to Client
  
-  conta=0;
+  count=0;
 
   }else
-  if(conta>120)
+  if(count>120)
   {
     Serial.print("_");
-    client.write("_"); //Invito al client '_'
+    client.write("_"); //Send '_' to Client
 
-  conta=0;
+  count=0;
 
  
   }
   
-  client.write("0"); //comunico al client che non sto digitando nulla
+  client.write("0"); //signal to Client that you're not typing anything
   
   
       
-       leggi = Serial.read(); //Lettura per eventuale stop del client da parte del server
+       reading = Serial.read(); //reading for possible stop of the Client
    
-   switch (leggi){
+   switch (reading){
    
      case'.':
       delay(1);
-    // Chiudo la connessione al client
-    client.write("\nIl server ha chiuso la connessione\n");
+    // Close Client connection
+    client.write("\nServer has closed the connection\n");
     client.stop();
-    Serial.println("Client disconnesso manualmente!");
+    Serial.println("Client manually disconnected!");
      
      break;
    }
