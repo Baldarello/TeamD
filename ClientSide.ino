@@ -1,7 +1,7 @@
 /*
   Web client
  
- Sketch per connettere una scheda Intel Galileo come client ad un'altra utilizzata come server
+ Sketch to connect Intel Galileo Client board to Server board
    
  created 15 May 2015
  by Team Destroyer
@@ -11,42 +11,42 @@
 #include <SPI.h>
 #include <Ethernet.h>
 
-byte mac[] = {  0x98, 0x4F, 0xEE, 0x00, 0x5F, 0xB6 }; //Mac della scheda da usare come client
-IPAddress server(192,168,100,100); // Server aka altra scheda con mac[] = {   0x98, 0x4F, 0xEE, 0x00, 0x5F, 0xCC };
-IPAddress ip(192,168,100,101); //Ip del client
-int led=13; //pin dove è collegato il led
-int i=0; //Contatore per la lunghezza del carattere morse immesso
-int contaspazio=0; //Contatore per il tempo che passa senza digitazione
-char dec[]="%%%%"; //Array dove memorizzare i caratteri morse inseriti
-boolean vuoto=true; //Controllo per verificare se dec è pieno o vuoto
-char lettera; //Carattere di appoggio dove inserire la lettera convertita dal codice morse
+byte mac[] = {  0x98, 0x4F, 0xEE, 0x00, 0x5F, 0xB6 }; //MAC address of the board
+IPAddress server(192,168,100,100);
+IPAddress ip(192,168,100,101); //Client IP address
+int led=13; //pin where the led is connected
+int i=0; //counter for lenght of morse character put in
+int countSpace=0; //counter for time pass without typing
+char dec[]="%%%%"; //Array to stora morse characters put in
+boolean empty=true; //Control to check if dec is full or empty
+char letter; //support character where put in the converted letter from code morse
 int buzzer =9;
 
-EthernetClient client; //client dove invieremo i dati
+EthernetClient client; //client to send data
 
 void setup() {
 pinMode(buzzer,OUTPUT);
 
-  Serial.begin(9600); //Serial per debug
+  Serial.begin(9600); //Serial to debug
   
-   pinMode(led,OUTPUT); //led per verificare '.' o '_'
+   pinMode(led,OUTPUT); //led to check '.' or '_'
 
 
- Ethernet.begin(mac,ip) ;  // Avvio della connessione Ethernet
+ Ethernet.begin(mac,ip) ;  // start of Ethernet connection
   
   delay(1000);
-  Serial.println("Connessione in corso...");
+  Serial.println("connection in progress...");
 
-  //Comunico alla Serial se ricevo una connessione:
+  //signal to Serial if a connected is received:
   if (client.connect(server, 60001)) {
-    Serial.println("Connesso!");
-    //Comunico al server che il client è pronto! 
-    client.println("Client pronto!");
+    Serial.println("Connected!");
+    //signal to Server that the Client is ready! 
+    client.println("Client ready!");
     client.println();
   } 
   else {
-    //Se fallisce la connessione al server:
-    Serial.println("Connessione fallita!");
+    //if Server connection fail:
+    Serial.println("Connessione failed!");
   }
 }
 
@@ -56,10 +56,10 @@ void loop()
   while (client.available()) {
     char c = client.read();
     
-   if(c!='.' && c!='_' && c!='0'){ Serial.print(c);} //Scrivo su Serial eventuali comunicazioni dal server che non siano '.' '_' o '0'(che corrisponde a nessun carattere digitato'
+   if(c!='.' && c!='_' && c!='0'){ Serial.print(c);} //write to Serial possible Server communication which are not '.' '_' o '0'(which corrisponds to no character typed)
     
     
-    /*Prendo il carattere ricevuto dal server e lo identifico!*/
+    /*take received character from Server and identify this*/
     switch(c){
       
     case '.':
@@ -67,7 +67,7 @@ void loop()
     delay(300);
     digitalWrite(led,LOW);
     tone(buzzer,1000,30);
-    contaspazio=0;
+    countSpace=0;
     dec[i]='.';
     i++;
     
@@ -77,56 +77,56 @@ void loop()
     delay(500);
     digitalWrite(led,LOW);
     tone(buzzer,1000,80);
-    contaspazio=0;
+    countSpace=0;
     dec[i]='_';
     i++;
     
   break;
-  case '0':contaspazio++;
+  case '0':countSpace++;
    break;
 }
   
-  if (contaspazio>=700){
+  if (countSpace>=700){
     
-     contaspazio=0;
-     lettera=decoder(dec);
+     countSpace=0;
+     letter=decoder(dec);
     
      for(int b=0;b<=i;b++){
-       if(dec[b]=='%' && vuoto)
-       { vuoto=true;}
+       if(dec[b]=='%' && empty)
+       { empty=true;}
        else
-       {vuoto=false;}
+       {empty=false;}
      }
      
-     if(!vuoto){
-        if(lettera!='?')
-        { Serial.print(lettera);}
+     if(!empty){
+        if(letter!='?')
+        { Serial.print(letter);}
         else{tone(buzzer,200,500);}
         
        for(int n=0;n<=i;n++)
        {dec[n]='%';}
        i=0;
-       vuoto=true;
+       empty=true;
      }
   }
 
   }
 
-  // Se non sono connesso al server lo segnalo:
+  // signal if Client is not connected to Server:
   if (!client.connected()) {
     Serial.println();
-    Serial.println("Disconnesso.");
+    Serial.println("Disconnected.");
     client.stop();
-    // Entro in un loop per non riavviare il metodo Main/Loop
+    // Enter in a loop to non reboot Main/Loop method
     for(;;)
       ;
   }
 }
 
 
-//funzione per decodificare il codice morse
+//function to decode morse code
 char decoder(char* s){
-switch (i) // i = Lunghezza del codice morse che ho digitato
+switch (i) // i = lenght of the typed code morse
 {
 case 1:
 if (s[0]=='.')
@@ -181,6 +181,6 @@ break;
 default :
 return '?';
 }
-return '?';    // non ho riconosciuto nulla
+return '?';    // nothing recognized
 }
 
